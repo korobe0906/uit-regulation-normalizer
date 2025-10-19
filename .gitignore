@@ -1,12 +1,71 @@
-# Python-generated files
+# ========================
+# 🐍 Python / Build
+# ========================
 __pycache__/
-*.py[oc]
+*.py[cod]
+*.so
 build/
 dist/
 wheels/
 *.egg-info
+.eggs/
+*.manifest
+*.spec
 
-# Virtual environments
-.venv
-.env
-data/
+# ========================
+# 🧪 Virtual Environments
+# ========================
+.venv/
+.env/
+.uv/
+.venv*/
+.venv*/Scripts/
+.venv*/Lib/
+
+# ========================
+# 📄 Data (OCR, cache, outputs)
+# ========================
+data/raw/
+data/processed/
+data/normalized/
+data/tmp/
+logs/
+reports/
+outputs/
+cache/
+tmp/
+*.log
+*.bak
+
+# ========================
+# 📦 Jupyter / Colab
+# ========================
+.ipynb_checkpoints/
+*.ipynb_save
+*.ipynb.tmp
+.colab/
+
+# ========================
+# ⚙️ IDE / Editor
+# ========================
+.vscode/
+.idea/
+*.code-workspace
+
+# ========================
+# 🧠 Model / OCR cache
+# ========================
+paddleocr/
+paddleocr/ppocr/utils/dict/
+*.onnx
+*.pt
+*.pth
+*.pb
+*.h5
+
+# ========================
+# ⚡ Misc / System
+# ========================
+.DS_Store
+Thumbs.db
+~$*
