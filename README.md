@@ -17,28 +17,6 @@ Each smallest unit (“Điểm”) becomes a clean, machine-readable data node f
 
 ---
 
-## 🧱 Project Structure
-
-uit-regulation-normalizer/
-│
-├── src/
-│ ├── loaders/ # Read PDF, DOCX, or HTML input
-│ ├── parsers/ # Detect and extract Chapter / Article / Clause / Point
-│ ├── normalizers/ # Clean text, fix OCR errors, unify encoding
-│ ├── exporters/ # Export structured JSONL dataset
-│ └── main.py # Pipeline entrypoint
-│
-├── data/
-│ ├── raw/ # Original regulation files
-│ ├── processed/ # Intermediate cleaned text
-│ └── normalized/ # Final JSONL outputs
-│
-├── pyproject.toml
-├── uv.lock
-└── README.md
-
----
-
 ## ⚙️ Pipeline Workflow
 
 1. **Ingest**
@@ -78,14 +56,3 @@ Each record represents a **single "Điểm"** (smallest legal unit):
   "version_date": "2024-09-01"
 }
 
-🚀 Quick Start
-
-# Clone repo
-git clone https://github.com/korobe0906/uit-regulation-normalizer.git
-cd uit-regulation-normalizer
-
-# Install dependencies using uv
-uv sync
-
-# Run the normalization pipeline
-uv run python src/main.py --input data/raw --output data/normalized
