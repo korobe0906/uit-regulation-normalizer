@@ -1,37 +1,6 @@
+# src/processing/__init__.py
 """
-This package groups all data processing modules, including cleaning and extraction.
+Processing package.
+Keep this file lightweight to avoid circular imports when running submodules.
 """
-
-# Expose key components from the cleaner submodule
-from .preprocess import (
-    BaseCleaner,
-    CleanerFactory,
-    clean_all,
-    clean_domain,
-    clean_folder
-)
-
-# Expose key components from the extractor submodule
-from .parser import (
-    BaseExtractor,
-    ExtractorFactory,
-    extract_all,
-    extract_domain,
-    extract_folder
-)
-
-__all__ = [
-    # Cleaner components
-    "BaseCleaner",
-    "CleanerFactory",
-    "clean_all",
-    "clean_domain",
-    "clean_folder",
-    
-    # Extractor components
-    "BaseExtractor",
-    "ExtractorFactory",
-    "extract_all",
-    "extract_domain",
-    "extract_folder",
-]
+__all__ = []  # optionally leave empty or list strings only

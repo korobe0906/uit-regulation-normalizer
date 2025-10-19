@@ -1,0 +1,9 @@
+ocr:
+  engine: "paddle"         # or "tesseract"
+  lang: "vi"
+  save_png: true
+  min_conf: 0.5
+
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
