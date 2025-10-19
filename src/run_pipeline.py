@@ -4,8 +4,8 @@ Main data processing pipeline that chains crawling, cleaning, and extraction.
 import asyncio
 
 from src.crawler import crawl_all
-from src.processing.cleaner import clean_all
-from src.processing.extractor import extract_all
+from src.processing.preprocess import clean_all
+from src.processing.parser import extract_all
 
 async def run_pipeline():
     """

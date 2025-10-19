@@ -5,7 +5,7 @@ import asyncio
 import argparse
 
 from src.config import START_URLS
-from src.processing.cleaner.cleaner_factory import CleanerFactory
+from src.processing.preprocess.cleaner_factory import CleanerFactory
 
 async def clean_folder(folder_path: str, domain: str):
     """

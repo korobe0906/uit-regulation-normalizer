@@ -8,51 +8,85 @@
 ## 📘 Overview
 
 This repository is part of the **UIT AI Agent** ecosystem.  
-It focuses on the **Normalization / Standardization** stage of the data pipeline —  
-where all regulation documents (PDF, DOCX, web text) are converted into **structured JSONL** data following the legal hierarchy:
+It handles the **Normalization / Standardization** stage of the data pipeline —  
+transforming raw regulation documents (PDF, DOCX, scanned images, HTML)  
+into **clean, structured, machine-readable JSONL units** based on Vietnam’s legal hierarchy:
 
 > **Chương → Điều → Khoản → Điểm**
 
-Each smallest unit (“Điểm”) becomes a clean, machine-readable data node for later indexing, ontology mapping, and retrieval in the chatbot.
+Each “Điểm” (point) becomes a minimal knowledge unit ready for indexing, ontology mapping, and retrieval in the UIT regulation chatbot.
 
 ---
 
-## ⚙️ Pipeline Workflow
+## 🧠 Objectives
 
-1. **Ingest**
-   - Load regulation documents from `/data/raw`
-   - Supported formats: `.pdf`, `.docx`, `.txt`, `.html`
-
-2. **Parse**
-   - Detect the structure:
-     ```
-     Chương I → Điều 5 → Khoản 2 → Điểm b
-     ```
-   - Split into hierarchical elements.
-
-3. **Normalize**
-   - Clean text (OCR, whitespace, Unicode normalization)
-   - Fix numbering and formatting errors.
-
-4. **Export**
-   - Save standardized dataset to `/data/normalized/uit_regulations.jsonl`
+| Stage | Description |
+|--------|--------------|
+| 🩵 **OCR Ingestion** | Extract text from scanned PDF/DOCX using PaddleOCR or Tesseract |
+| 💙 **Structure Parsing** | Detect and split legal hierarchy: Chapter / Article / Clause / Point |
+| 💜 **Text Normalization** | Fix OCR typos, unify Unicode, clean spacing and punctuation |
+| 💛 **Metadata Extraction** | Retrieve document number, issue date, version, category |
+| 🧾 **Export & QC** | Output structured JSONL, log OCR confidence, and report anomalies |
 
 ---
 
-## 📄 Output Schema Example
+## 🚀 Quick Start
+1️⃣ Installation
 
-Each record represents a **single "Điểm"** (smallest legal unit):
+# Clone repository
+- git clone : https://github.com/korobe0906/uit-regulation-normalizer.git
+- cd uit-regulation-normalizer
 
+# Install dependencies using uv
+
+2️⃣ Run the pipeline
+
+# Run full end-to-end pipeline
+- uv run python src/main.py
+
+- or (explicit orchestrator version):
+uv run python src/pipeline.py --input data/raw --output data/normalized
+
+### 📄 Sample Output
 ```json
 {
-  "doc_name": "Quy chế đào tạo đại học UIT 2024",
-  "chapter": "I",
-  "article": 5,
-  "clause": 2,
-  "point": "b",
-  "text": "Sinh viên phải giữ gìn vệ sinh, trật tự trong lớp học.",
-  "source_file": "uit_regulation_2024.pdf",
-  "page_range": [10, 11],
-  "version_date": "2024-09-01"
+  "doc_name": "Quyết định số 1393 - Bổ sung Quy chế đào tạo theo tín chỉ",
+  "doc_number": "1393",
+  "date": "2024-06-05",
+  "category": "Đào tạo",
+  "chapter": "II",
+  "article": 4,
+  "clause": 3,
+  "point": null,
+  "text": "Sinh viên được phép đăng ký học lại tối đa 3 học phần trong một học kỳ.",
+  "source_file": "Quyet_dinh_1393.pdf",
+  "page_range": [2,3],
+  "ocr_confidence": 0.93
 }
+```
+---
+
+## 🧩 Integration in UIT AI Agent Ecosystem
+```
+Stage	Repository	Description
+(1) Ingestion	uit-data-ingestion	Crawl official documents (web, announcements)
+(2) Normalization	uit-regulation-normalizer	OCR + parse + clean + export structured data
+(3) Ontology Builder	uit-ontology-builder	Map relations for knowledge graph
+(4) RAG Backend	uit-rag-agent	Retrieve relevant regulations for chatbot
+(5) Chat UI	uit-chat-ui	Student-facing chatbot interface
+```
+---
+
+## 🧮 Logging & Reports
+```
+OCR confidence per page
+
+Number of chapters, articles, clauses, and points detected
+
+Documents with low quality (<0.85 confidence) flagged for review
+
+JSONL record count summary
+
+Exported logs in /data/normalized/reports/
+```
 
