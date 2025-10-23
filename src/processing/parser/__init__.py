@@ -1,20 +1,6 @@
+# src/processing/__init__.py
 """
-This package contains modules for extracting text content from various file formats.
-
-Key components:
-- BaseExtractor: The abstract base class for all file extractors.
-- ExtractorFactory: A factory for creating extractor instances based on file extension.
-- extract_all, extract_domain, extract_folder: Core functions to run the extraction process.
+Processing package.
+Keep this file lightweight to avoid circular imports when running submodules.
 """
-
-from .base_extractor import BaseExtractor
-from .extractor_factory import ExtractorFactory
-from .extractor_core import extract_all, extract_domain, extract_folder
-
-__all__ = [
-    "BaseExtractor",
-    "ExtractorFactory",
-    "extract_all",
-    "extract_domain",
-    "extract_folder",
-]
+__all__ = []  # optionally leave empty or list strings only

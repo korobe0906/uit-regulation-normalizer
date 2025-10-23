@@ -3,11 +3,12 @@ import cv2
 import numpy as np
 from pathlib import Path
 import os, platform
-from typing import List
+from typing import List, Optional
 from PIL import Image
 from paddle import crop
 from pdf2image import convert_from_path
 import pytesseract
+import tempfile, subprocess, shutil, os
 
 def _osd_angle_deg(bgr):
     try:
@@ -104,30 +105,38 @@ def _detect_poppler_path() -> str | None:
                 return p
     return None
 
-def pdf_to_images(pdf_path: str, dpi: int = 300, poppler_path: str | None = None) -> List[Image.Image]:
-    """
-    Trả về list PIL.Image (mỗi trang một ảnh).
-    Trên Windows cần poppler_path (thư mục ...\bin).
-    """
-    pdf = Path(pdf_path)
-    if not pdf.exists():
-        print(f"[ERROR] PDF not found: {pdf}")
-        return []
 
-    if poppler_path is None:
-        poppler_path = _detect_poppler_path()
 
-    try:
-        pages = (convert_from_path(str(pdf), dpi=dpi, poppler_path=poppler_path)
-                 if poppler_path else convert_from_path(str(pdf), dpi=dpi))
-        print(f"[INFO] pdf_to_images: rendered {len(pages)} page(s) with dpi={dpi} "
-              f"{'(poppler OK)' if poppler_path else '(no poppler_path; non-Windows?)'}")
-        return pages
-    except Exception as e:
-        print(f"[ERROR] convert_from_path failed: {e}")
-        if platform.system().lower() == "windows":
-            print("[HINT] Kiểm tra POPPLER_PATH trỏ đúng tới thư mục ...\\poppler\\bin")
-        return []
+def pdf_to_images(pdf_path: str, dpi: int = 300, poppler_path: Optional[str] = None,
+                  limit: Optional[int] = None, output_dir: Optional[str] = None) -> List[Image.Image]:
+    pdf_abs = str(Path(pdf_path).resolve())
+    if not os.path.exists(pdf_abs):
+        raise FileNotFoundError(f"PDF not found: {pdf_abs}")
+
+    # chọn nơi ghi ảnh
+    out_dir = Path(output_dir).resolve() if output_dir else Path.cwd() / "render_tmp"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    prefix = str((out_dir / "page").resolve())   # -> ...\b1-xxxx\render\page-001.png
+
+    bin_dir = poppler_path or os.getenv("POPPLER_PATH") or ""
+    pdftoppm = shutil.which("pdftoppm", path=bin_dir) or str(Path(bin_dir) / "pdftoppm.exe")
+    if not (pdftoppm and os.path.exists(pdftoppm)):
+        raise RuntimeError("pdftoppm.exe not found. Pass --poppler_path <...\\bin>")
+
+    cmd = [pdftoppm, "-r", str(dpi), "-png"]
+    if limit and limit > 0:
+        cmd += ["-f", "1", "-l", str(limit)]     # 👈 chỉ render từ 1..limit
+    cmd += [pdf_abs, prefix]
+
+    print(f"[DEBUG:image_ops] run: {' '.join(cmd)}")
+    subprocess.run(cmd, check=True, timeout=180)
+
+    files = sorted(out_dir.glob("page-*.png"))
+    if limit:
+        files = files[:limit]
+    pages = [Image.open(f).convert("RGB") for f in files]
+    print(f"[DEBUG:image_ops] rendered {len(pages)} page(s) -> {out_dir}")
+    return pages
 
 def ensure_3_channels(img: np.ndarray) -> np.ndarray:
     # img có thể là HxW (gray) hoặc HxWxC

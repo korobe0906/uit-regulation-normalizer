@@ -12,7 +12,6 @@ from .extract_scan import ocr_page_to_lines, detect_tables_csv, save_scan_tables
 from .image_ops import pdf_to_images, preprocess_image, split_and_upright
 from src.processing.preprocess.writer import paddle_to_page, save_page_json
 from src.processing.preprocess.ocr.factory import build_engine as ocr_build_engine
-
 # PyMuPDF (optional) để phát hiện/trích text với PDF số
 try:
     import fitz  # PyMuPDF
@@ -77,7 +76,10 @@ def main():
     ap.add_argument("--tables", action="store_true",
                     help="Trích bảng ra CSV nếu phát hiện được")
     ap.add_argument("--norm_loose", action="store_true",
-                help="Chuẩn hoá nhẹ tay: không xoá header/footer lặp và hạn chế dọn rác.")
+                    help="Chuẩn hoá nhẹ tay: không xoá header/footer lặp và hạn chế dọn rác.")
+    ap.add_argument("--force_ocr", action="store_true",
+                    help="Bỏ qua text layer của PDF số, luôn OCR ảnh (Tesseract/Paddle).")
+
     args = ap.parse_args()
 
     pdf = Path(args.input)
@@ -91,8 +93,18 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"[INFO] Saving OCR result to: {out_dir.resolve()}")
 
-    # Render PDF -> images (dù PDF số vẫn render để thống nhất debug)
-    pages = pdf_to_images(str(pdf), dpi=args.dpi, poppler_path=args.poppler_path)
+    print(f"[DEBUG] Calling pdf_to_images on {pdf} (dpi={args.dpi}) poppler={args.poppler_path}")
+    # mới
+    render_dir = out_dir / "render"
+    render_dir.mkdir(parents=True, exist_ok=True)
+    pages = pdf_to_images(
+        str(pdf),
+        dpi=args.dpi,
+        poppler_path=args.poppler_path,
+        limit=args.limit,           # 👈 để -f/-l có hiệu lực
+        output_dir=str(render_dir), # 👈 render ngay trong cùng job folder
+    )
+    print(f"[DEBUG] pdf_to_images returned {len(pages) if pages else 0}")
     if not pages:
         print("[ERROR] No pages rendered from PDF. (Thiếu Poppler trên Windows?)", file=sys.stderr)
         print("=> Cài Poppler và truyền --poppler_path C:\\path\\to\\poppler\\bin", file=sys.stderr)
@@ -139,7 +151,9 @@ def main():
             except Exception:
                 has_text = False
 
-        if args.engine in ("auto",) and has_text:
+                # ---- Nhánh A: PDF số → bỏ OCR, trích trực tiếp bằng PyMuPDF ----
+        use_digital = (args.engine == "auto") and has_text and (not args.force_ocr)
+        if use_digital:
             w, h = int(page.rect.width), int(page.rect.height)
             blocks = page.get_text("blocks", flags=fitz.TEXTFLAGS_TEXT)
             lines = []
