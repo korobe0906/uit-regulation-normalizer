@@ -79,6 +79,9 @@ def main():
                     help="Chuẩn hoá nhẹ tay: không xoá header/footer lặp và hạn chế dọn rác.")
     ap.add_argument("--force_ocr", action="store_true",
                     help="Bỏ qua text layer của PDF số, luôn OCR ảnh (Tesseract/Paddle).")
+      
+    ap.add_argument("--save_render_debug", action="store_true",
+                    help="Lưu debug_render_XXX.png (mặc định không lưu).")
 
     args = ap.parse_args()
 
@@ -194,10 +197,10 @@ def main():
         #regions = split_and_upright(bgr_base)  # -> [(0, 0, bgr_rot)]
         regions = [(0, 0, bgr_base)]
 
-        for r_idx, (x_off, y_off, bgr_rot) in enumerate(regions, start=1):
+        #for r_idx, (x_off, y_off, bgr_rot) in enumerate(regions, start=1):
             #cv2.imwrite(str(out_dir / f"debug_pre_{i+1:03d}_{args.engine}_part{r_idx}.png"), bgr_rot)
             # ngay sau render từ pdf_to_images, trước preprocess:
-            cv2.imwrite(str(out_dir / f"debug_render_{i+1:03d}.png"), cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR))
+            #cv2.imwrite(str(out_dir / f"debug_render_{i+1:03d}.png"), cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR))
             # ngay sau preprocess_image:
             #cv2.imwrite(str(out_dir / f"debug_preprocess_{i+1:03d}.png"), bgr_base)
 
